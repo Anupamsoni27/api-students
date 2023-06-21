@@ -1,78 +1,29 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
+from pymongo import MongoClient
+from bson.json_util import dumps
 
 app = Flask(__name__)
 
-
-# Fake student data
-students = [
-    {
-        "id": "1001",
-        "name": "Alice Smith",
-        "age": 17,
-        "grade": 11,
-        "address": "456 Oak Avenue",
-        "city": "Exampletown",
-        "state": "New York",
-        "country": "United States",
-        "courses": [
-            {
-                "courseName": "Mathematics",
-                "teacher": "Mr. Johnson",
-                "grade": "B+"
-            },
-            {
-                "courseName": "Science",
-                "teacher": "Mrs. Adams",
-                "grade": "A"
-            },
-            {
-                "courseName": "English",
-                "teacher": "Ms. Thompson",
-                "grade": "A"
-            }
-        ]
-    },
-    {
-        "id": "1002",
-        "name": "Bob Johnson",
-        "age": 16,
-        "grade": 10,
-        "address": "789 Elm Street",
-        "city": "Exampleville",
-        "state": "California",
-        "country": "United States",
-        "courses": [
-            {
-                "courseName": "Mathematics",
-                "teacher": "Mr. Davis",
-                "grade": "A-"
-            },
-            {
-                "courseName": "Science",
-                "teacher": "Mrs. Wilson",
-                "grade": "B"
-            },
-            {
-                "courseName": "English",
-                "teacher": "Ms. Roberts",
-                "grade": "B+"
-            }
-        ]
-    }
-]
+# Establish a connection to MongoDB
+client = MongoClient("mongodb+srv://anupamsoni27:Mystuff8358%401@india-01.kwer3ek.mongodb.net/")
+db = client['students']
+collection = db['studentsList']
 
 
 @app.route('/students', methods=['GET'])
 def get_students():
-    return jsonify(students)
+    data = collection.find()
+    return dumps(data)
 
 
-@app.route('/students/<student_id>', methods=['GET'])
+@app.route('/student/<int:student_id>', methods=['GET'])
 def get_student(student_id):
-    for student in students:
-        if student['id'] == student_id:
-            return jsonify(student)
-    return jsonify({'message': 'Student not found'})
+    print(student_id)
+    student = collection.find_one({"id": student_id})
+    if student:
+        return dumps(student)
+    else:
+        return jsonify({"message": "Student not found."}), 404
 
 
 if __name__ == '__main__':
