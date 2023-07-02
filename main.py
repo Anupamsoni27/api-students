@@ -1,8 +1,17 @@
+from boto3 import resources
 from flask import Flask, jsonify
 from pymongo import MongoClient
 from bson.json_util import dumps
+from flask_cors import CORS
 
 app = Flask(__name__)
+
+CORS(app)
+cors = CORS(app, resources={
+    r"/*" : {
+        "origins": "*"
+    }
+})
 
 # Establish a connection to MongoDB
 client = MongoClient("mongodb+srv://anupamsoni27:Mystuff8358%401@india-01.kwer3ek.mongodb.net/")
