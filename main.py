@@ -78,19 +78,23 @@ db = client['students']
 collection = db['studentsList']
 subjects_coll = db['subjects']
 exams_coll = db["exams"]
+questions_coll = db["questions"]
+
 
 @app.route('/', methods=['GET'])
 def say_hello():
     return jsonify({"m": "Welcome to student api"})
 
-@app.route('/students', methods=['GET'])
-def get_students():
+
+@app.route('/questions', methods=['GET'])
+def get_questions():
     page = int(request.args.get('page', 1))
     per_page = int(request.args.get('per_page', 10))
     skip = (page - 1) * per_page
 
-    data = collection.find().skip(skip).limit(per_page)
+    data = questions_coll.find().skip(skip).limit(per_page)
     return dumps(data)
+
 
 @app.route('/subjects', methods=['GET'])
 def get_subjects():
@@ -101,6 +105,7 @@ def get_subjects():
     data = subjects_coll.find().skip(skip).limit(per_page)
     return dumps(data)
 
+
 @app.route('/exams', methods=['GET'])
 def get_exams():
     page = int(request.args.get('page', 1))
@@ -110,6 +115,7 @@ def get_exams():
     data = exams_coll.find().skip(skip).limit(per_page)
     return dumps(data)
 
+
 @app.route('/student/<int:student_id>', methods=['GET'])
 def get_student(student_id):
     student = collection.find_one({"id": student_id})
@@ -118,5 +124,16 @@ def get_student(student_id):
     else:
         return jsonify({"message": "Student not found."}), 404
 
+
+@app.route('/questions/<int:questions_id>', methods=['GET'])
+def get_question_for_id(questions_id):
+    question = questions_coll.find_one({"id": questions_id})
+    if question:
+        return dumps(question)
+    else:
+        return jsonify({"message": "Question not found."}), 404
+
+
 if __name__ == '__main__':
     app.run()
+
