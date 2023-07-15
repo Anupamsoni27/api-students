@@ -79,7 +79,7 @@ collection = db['studentsList']
 subjects_coll = db['subjects']
 exams_coll = db["exams"]
 questions_coll = db["questions"]
-
+categories_coll = db["categories"]
 
 @app.route('/', methods=['GET'])
 def say_hello():
@@ -103,6 +103,12 @@ def get_subjects():
     skip = (page - 1) * per_page
 
     data = subjects_coll.find().skip(skip).limit(per_page)
+    return dumps(data)
+
+
+@app.route('/categories', methods=['GET'])
+def get_categories():
+    data = categories_coll.find()
     return dumps(data)
 
 
