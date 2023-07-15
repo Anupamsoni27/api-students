@@ -122,6 +122,16 @@ def get_exams():
     return dumps(data)
 
 
+@app.route('/exams/<string:exam_id>', methods=['GET'])
+def get_questions_for_exam_id(exam_id):
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 10))
+    skip = (page - 1) * per_page
+
+    data = questions_coll.find({"exam_id": exam_id}).skip(skip).limit(per_page)
+    return dumps(data)
+
+
 @app.route('/student/<int:student_id>', methods=['GET'])
 def get_student(student_id):
     student = collection.find_one({"id": student_id})
