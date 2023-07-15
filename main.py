@@ -92,7 +92,7 @@ def get_questions():
     per_page = int(request.args.get('per_page', 10))
     skip = (page - 1) * per_page
 
-    data = questions_coll.find().skip(skip).limit(per_page)
+    data = questions_coll.find({"course": "MPPSC"}).skip(skip).limit(per_page)
     return dumps(data)
 
 
