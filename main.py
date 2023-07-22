@@ -172,6 +172,8 @@ def get_questions():
         # Use regex to perform a case-insensitive search for tags and globalConcept
         if prop_name in ["tags", "globalConcept"]:
             search_filter[prop_name] = {"$regex": re.compile(value, re.IGNORECASE)}
+        elif prop_name == "search_term":
+            search_filter["en.value"] = {"$regex": re.compile(value, re.IGNORECASE)}
         else:
             search_filter[prop_name] = value
 
