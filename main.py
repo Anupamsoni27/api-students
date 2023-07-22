@@ -167,7 +167,7 @@ def get_questions():
     search_filter = {}
     for item in data["data"]:
         prop_name = item["propertyName"]
-        value = item["Value"]
+        value = item["value"]
 
         # Use regex to perform a case-insensitive search for tags and globalConcept
         if prop_name in ["tags", "globalConcept"]:
