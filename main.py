@@ -56,7 +56,7 @@
 #
 # if __name__ == '__main__':
 #     app.run()
-
+import re
 
 from flask import Flask, jsonify, request
 from pymongo import MongoClient
@@ -86,14 +86,14 @@ def say_hello():
     return jsonify({"m": "Welcome to student api"})
 
 
-@app.route('/questions', methods=['GET'])
-def get_questions():
-    page = int(request.args.get('page', 1))
-    per_page = int(request.args.get('per_page', 10))
-    skip = (page - 1) * per_page
-
-    data = questions_coll.find({"course": "MPPSC"}).skip(skip).limit(per_page)
-    return dumps(data)
+# @app.route('/questions', methods=['GET'])
+# def get_questions():
+#     page = int(request.args.get('page', 1))
+#     per_page = int(request.args.get('per_page', 10))
+#     skip = (page - 1) * per_page
+#
+#     data = questions_coll.find({"course": "MPPSC"}).skip(skip).limit(per_page)
+#     return dumps(data)
 
 
 @app.route('/subjects', methods=['GET'])
@@ -122,7 +122,7 @@ def get_exams():
     return dumps(data)
 
 
-@app.route('/exams/<string:exam_id>', methods=['GET'])
+@app.route('/getQuestionsByExamId/<string:exam_id>', methods=['GET'])
 def get_questions_for_exam_id(exam_id):
     page = int(request.args.get('page', 1))
     per_page = int(request.args.get('per_page', 10))
@@ -150,6 +150,36 @@ def get_question_for_id(questions_id):
         return jsonify({"message": "Question not found."}), 404
 
 
+@app.route('/questions', methods=['POST'])  # Change method to POST for search requests
+def get_questions():
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 10))
+    skip = (page - 1) * per_page
+
+    # Get the search data from the request payload using request.get_json(force=True)
+    data = request.get_json(force=True)
+
+    # Check if the data is a dictionary and contains the "data" key
+    if not isinstance(data, dict) or "data" not in data:
+        return jsonify({"message": "Invalid request payload. 'data' key is missing."}), 400
+
+    # Create a filter based on the search data
+    search_filter = {}
+    for item in data["data"]:
+        prop_name = item["propertyName"]
+        value = item["Value"]
+
+        # Use regex to perform a case-insensitive search for tags and globalConcept
+        if prop_name in ["tags", "globalConcept"]:
+            search_filter[prop_name] = {"$regex": re.compile(value, re.IGNORECASE)}
+        else:
+            search_filter[prop_name] = value
+
+    # Use the search filter in the find query
+    data = questions_coll.find(search_filter).skip(skip).limit(per_page)
+
+    return dumps(data)
+
+
 if __name__ == '__main__':
     app.run()
-
