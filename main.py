@@ -85,6 +85,7 @@ exams_coll = db["exams"]
 questions_coll = db["questions"]
 categories_coll = db["categories"]
 users_coll = db['users']
+filter_coll = db['filter']
 
 # JWT secret key (you should change this to a more secure value)
 JWT_SECRET_KEY = "1234567890"
@@ -349,7 +350,7 @@ def get_filters():
             search_filter[prop_name] = value
 
     # Use the search filter in the find query
-    data = exams_coll.distinct("course")
+    data = filter_coll.find({})
 
     return dumps(data)
 
