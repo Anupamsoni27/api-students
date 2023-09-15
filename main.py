@@ -335,24 +335,17 @@ def get_filters():
     if not isinstance(data, dict) or "data" not in data:
         return jsonify({"message": "Invalid request payload. 'data' key is missing."}), 400
 
-    # Create a filter based on the search data
-    search_filter = {}
-    for item in data["data"]:
-        prop_name = item["propertyName"]
-        value = item["value"]
-
-        # Use regex to perform a case-insensitive search for tags and globalConcept
-        if prop_name in ["tags", "globalConcept"]:
-            search_filter[prop_name] = {"$regex": re.compile(value, re.IGNORECASE)}
-        elif prop_name == "search_term":
-            search_filter["en.value"] = {"$regex": re.compile(value, re.IGNORECASE)}
-        else:
-            search_filter[prop_name] = value
 
     # Use the search filter in the find query
-    data = filter_coll.find({})
+    result = list(filter_coll.find({}))
 
-    return dumps(data)
+    # Convert the result to a list of dictionaries
+    records = result
+
+    # Get the count of records
+    count = len(records)
+
+    return dumps({"status": "success", "records": records, "count": count})
 
 
 # User Signup
