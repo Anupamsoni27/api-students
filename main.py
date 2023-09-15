@@ -304,11 +304,24 @@ def get_questions():
 
         # Use regex to perform a case-insensitive search for tags and globalConcept
         if prop_name in ["tags", "globalConcept"]:
-            search_filter[prop_name] = {"$regex": re.compile(value, re.IGNORECASE)}
+            # Create a filter based on the search data
+            search_filter = {
+                "$or": [
+                    {item["propertyName"]: {"$regex": re.compile(item["value"], re.IGNORECASE)}}
+                    for item in data["data"]
+                ]
+            }
+
         elif prop_name == "search_term":
             search_filter["en.value"] = {"$regex": re.compile(value, re.IGNORECASE)}
         else:
-            search_filter[prop_name] = value
+            # search_filter[prop_name] = value
+            search_filter = {
+                "$or": [
+                    {item["propertyName"]: {"$regex": re.compile(item["value"], re.IGNORECASE)}}
+                    for item in data["data"]
+                ]
+            }
 
     # Use the search filter in the find query
     data = questions_coll.find(search_filter).skip(skip).limit(per_page)
