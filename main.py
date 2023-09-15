@@ -315,6 +315,45 @@ def get_questions():
     return dumps(data)
 
 
+@app.route('/filters', methods=['POST'])  # Change method to POST for search requests
+def get_filters():
+    # Get the JWT token from the request headers
+    token = request.headers.get('Authorization')
+    if not token:
+        return jsonify({"message": "Authorization token required"}), 401
+
+    # Validate the token
+    payload = validate_token(token)
+    if "message" in payload:
+        return jsonify(payload), 401
+
+    # Get the search data from the request payload using request.get_json(force=True)
+    data = request.get_json(force=True)
+
+    # Check if the data is a dictionary and contains the "data" key
+    if not isinstance(data, dict) or "data" not in data:
+        return jsonify({"message": "Invalid request payload. 'data' key is missing."}), 400
+
+    # Create a filter based on the search data
+    search_filter = {}
+    for item in data["data"]:
+        prop_name = item["propertyName"]
+        value = item["value"]
+
+        # Use regex to perform a case-insensitive search for tags and globalConcept
+        if prop_name in ["tags", "globalConcept"]:
+            search_filter[prop_name] = {"$regex": re.compile(value, re.IGNORECASE)}
+        elif prop_name == "search_term":
+            search_filter["en.value"] = {"$regex": re.compile(value, re.IGNORECASE)}
+        else:
+            search_filter[prop_name] = value
+
+    # Use the search filter in the find query
+    data = exams_coll.distinct("course")
+
+    return dumps(data)
+
+
 # User Signup
 @app.route('/signup', methods=['POST'])
 def signup():
